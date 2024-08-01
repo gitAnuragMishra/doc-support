@@ -1,2 +1,4 @@
 doc-env/
+models/
 .env
+chroma_db/
