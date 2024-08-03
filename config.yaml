@@ -1,7 +1,11 @@
-model:
+llama_model:
+  model_path: 'models\llama-2-7b-chat.Q4_K_M.gguf'
+  model_type: 'llama'
+  model_config: {'max_new_tokens': 512, 'temperature': 0.4, 'context_length': 4096, 'gpu_layers': 10}
+mistral_model:
   model_path: 'models\mistral-7b-instruct-v0.1.Q5_K_M.gguf'
-  model_type: 'mistal'
-  model_config: {'max_new_tokens': 512, 'temperature': 0.2, 'context_length': 4096, 'gpu_layers':0 }
+  model_type: 'mistral'
+  model_config: {'max_new_tokens': 512, 'temperature': 0.4, 'context_length': 4096, 'gpu_layers': 15 }
 
 
 embeddings_path: 'BAAI/bge-large-en-v1.5'

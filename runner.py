@@ -31,7 +31,7 @@ def main():
     
     if send_button or st.session_state.send_input:
         if st.session_state.user_question != ' ':
-            llm_response = llm_chain.run(st.session_state.user_question) 
+            llm_response = llm_chain.run(user_input=st.session_state.user_question) 
 
             with chat_container:
                 with st.chat_message('user', avatar= 'human'):
