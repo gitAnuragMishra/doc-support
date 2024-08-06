@@ -8,8 +8,10 @@ import chromadb
 from prompt_template import memory_prompt_template
 import yaml
 import torch
-from accelerate import Accelerator #type: ignore
+# from accelerate import Accelerator #type: ignore
 #from sentence_transformers import SentenceTransformer
+#from transformers import AutoModelForCausalLM
+#from llama_cpp import Llama
 import os
 os.environ['HF_HOME'] = r'E:\doc-support\models'
 os.environ['HF_HUB_CACHE'] = r'E:\doc-support\models'
@@ -19,13 +21,12 @@ with open('config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 
-def create_llm(model_path = config['mistral_model']['model_path'], model_type = config['mistral_model']['model_type'], model_config = config['mistral_model']['model_config'], gpu_layers= config['mistral_model']['model_config']['gpu_layers']):
-    #model_config['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    llm = CTransformers(model=model_path, model_type= model_type, config=model_config, gpu_layers = config['mistral_model']['model_config']['gpu_layers'])
-    # llm, conf = Accelerator.prepare(llm, conf)
-    #llm.to(device)
+def create_llm(model_path = config['tinyllama_model']['model_path'], model_type = config['tinyllama_model']['model_type'], model_config = config['tinyllama_model']['model_config'], gpu_layers= config['tinyllama_model']['model_config']['gpu_layers']):
+    
+    llm = CTransformers(model=model_path, model_type= model_type, config=model_config, gpu_layers = gpu_layers)
+
         
+    #llm = CTransformers(model_path='models\gpt2_pytorch_model.bin', model_type= 'gpt2', gpu_layers = 10)
     return llm
 
 def create_embeddings(embeddings_path = config['embeddings_path']):
@@ -34,7 +35,7 @@ def create_embeddings(embeddings_path = config['embeddings_path']):
     return embedding_model
 
 def create_chat_memory(chat_history):
-    return ConversationBufferWindowMemory(memory_key= "history", chat_memory=chat_history, k = 3)
+    return ConversationBufferWindowMemory(memory_key= "history", chat_memory=chat_history, k = 1)
 
 def create_prompt_from_template(template):
     return PromptTemplate.from_template(template)
@@ -61,7 +62,7 @@ class chatChain:
 # }
 
     def run(self, user_input):
-        #return self.llm_chain.invoke(human_input = user_input)
+        #return self.llm_chain.invoke(user_input, stop = ['Human:'])
         return self.llm_chain.run(human_input = user_input, history = self.memory.chat_memory.messages, stop = ['Human:'])
 
 

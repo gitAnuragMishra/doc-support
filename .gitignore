@@ -3,3 +3,4 @@ models/
 .env
 chroma_db/
 __pycache__/
+chat_sessions/
