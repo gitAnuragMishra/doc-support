@@ -22,4 +22,4 @@ def load_chat_history_json(file_path):
         return messages
     
 def get_timestamp():
-    return datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    return datetime.now().strftime("%d.%m.%Y_%H.%M.%S")

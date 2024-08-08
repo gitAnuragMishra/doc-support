@@ -23,57 +23,77 @@ def clear_input():
 def save_chat_history():
     if st.session_state.history != []:
         if st.session_state.session_key == 'new_session':
-            st.session_state.new_session_key = get_timestamp()
-            save_chat_history_json(st.session_state.history, config['chat_history_path'] + st.session_state.new_session_key + ".json")
+            st.session_state.new_session_key = get_timestamp() + '.json'
+            save_chat_history_json(st.session_state.history, config['chat_history_path'] + st.session_state.new_session_key)
         else:
-            save_chat_history_json(st.session_state.history, config['chat_history_path'] + st.session_state.session_key + ".json")
+            save_chat_history_json(st.session_state.history, config['chat_history_path'] + st.session_state.session_key)
+
+
 
 def main():
-    st.set_page_config(page_title="Doc Support", 
-                       page_icon=':books:')
+    st.set_page_config(page_title="Doc Support", page_icon=':books:')
     st.header("Doc Support :books:", divider=True)
+
+
+
+
 
     st.sidebar.title("Chat Sessions")
     chat_sessions = ['new_session'] + os.listdir(config['chat_history_path'])
-    st.sidebar.selectbox("Select the chat session", chat_sessions, key='session_key')
 
     if 'send_input' not in st.session_state:
+        st.session_state.session_key = 'new_session'
         st.session_state.send_input = False
         st.session_state.user_question = ' '
         st.session_state.new_session_key = None
+        st.session_state.session_index_tracker = 'new_session'
+        st.session_state.history_loaded = False 
 
+    if st.session_state.session_key == 'new_session' and st.session_state.new_session_key != None:
+        st.session_state.session_index_tracker = st.session_state.new_session_key
+        st.session_state.new_session_key = None
 
+    index = chat_sessions.index(st.session_state.session_index_tracker)
+    selected_session = st.sidebar.selectbox("Return to chats", chat_sessions, key='session_key', index=index)
+    
+    if st.session_state.session_key != 'new_session':
+        st.session_state.history = load_chat_history_json(config['chat_history_path'] + st.session_state.session_key)
     
 
     
+    
+
+    # Automatically load chat history once a session is selected
+    if selected_session != 'new_session' and not st.session_state.history_loaded:
+        st.session_state.history = load_chat_history_json(config['chat_history_path'] + selected_session)
+        st.session_state.history_loaded = True
 
     chat_history = StreamlitChatMessageHistory(key='history')
     llm_chain = load_chain(chat_history)
     chat_container = st.container(border=True)
-    user_input = st.text_area(label='question', label_visibility='hidden', placeholder="ask your question", key = 'user_input' , on_change=set_send_input)
-    send_button = st.button("Process", key = 'send_button')
+    user_input = st.text_area(label='question', label_visibility='hidden', placeholder="Ask your question", key='user_input', on_change=set_send_input)
+    send_button = st.button("Process", key='send_button')
 
-    
     if send_button or st.session_state.send_input:
         if st.session_state.user_question != ' ':
-            llm_response = llm_chain.run(user_input=st.session_state.user_question) 
-            
+            llm_response = llm_chain.run(user_input=st.session_state.user_question)
             with chat_container:
-                # with st.chat_message('user', avatar= 'human'):
-                #     st.write(st.session_state.user_question)    #one way of writing code
-                    
-                #st.chat_message('llm', avatar= 'ai').write(llm_response) #another way
-                st.session_state.user_question != ' '
-                
-        if chat_history.messages != []:
-            with chat_container:
-                st.write("Chat History: ")
-                for message in chat_history.messages:
-                    st.chat_message(message.type).write(message.content)
-        del llm_response
+                # with st.chat_message('user', avatar='human'):
+                #     st.write(st.session_state.user_question)  # One way of writing user question.
+
+                # st.chat_message('llm', avatar='ai').write(llm_response)  # Another way to write LLM response.
+                pass  # This is where you handle user questions.
+
+
+    if chat_history.messages != []:
+        with chat_container:
+            st.write("Chat History: ")
+            for message in chat_history.messages:
+                st.chat_message(message.type).write(message.content)
         torch.cuda.empty_cache()
 
     save_chat_history()
+
     
 
 

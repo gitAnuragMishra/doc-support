@@ -35,7 +35,7 @@ def create_embeddings(embeddings_path = config['embeddings_path']):
     return embedding_model
 
 def create_chat_memory(chat_history):
-    return ConversationBufferWindowMemory(memory_key= "history", chat_memory=chat_history, k = 1)
+    return ConversationBufferWindowMemory(memory_key= "history", chat_memory=chat_history, k = 3)
 
 def create_prompt_from_template(template):
     return PromptTemplate.from_template(template)
