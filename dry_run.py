@@ -4,7 +4,7 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 #from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 #from langchain_community.embeddings import OpenAIEmbeddings  
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer  # type: ignore
 #from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores.chroma import Chroma
 import chromadb
