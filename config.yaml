@@ -19,3 +19,5 @@ embeddings_path: 'BAAI/bge-large-en-v1.5'
 
 
 chat_history_path: 'E:\doc-support\chat_sessions\'
+
+vector_db_path: 'E:\doc-support\chroma_db'

@@ -9,16 +9,31 @@ from prompt_template import memory_prompt_template
 import yaml
 import torch
 # from accelerate import Accelerator #type: ignore
-#from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer #type: ignore
 #from transformers import AutoModelForCausalLM
 #from llama_cpp import Llama
 import os
 os.environ['HF_HOME'] = r'E:\doc-support\models'
 os.environ['HF_HUB_CACHE'] = r'E:\doc-support\models'
-
-
 with open('config.yaml', 'r') as f:
     config = yaml.safe_load(f)
+
+
+
+
+def create_embeddings(embeddings_path = config['embeddings_path']):
+    embedding_model = HuggingFaceBgeEmbeddings(model_name = embeddings_path, cache_folder=r'E:\doc-support\models')
+    #embedding_model = SentenceTransformer(model_name_or_path='E:\doc-support\models\models--sentence-transformers--all-MiniLM-L6-v2', cache_folder=r'E:\doc-support\models')
+    return embedding_model
+def load_vectordb(embeddings):
+    persistent_client = chromadb.PersistentClient(path = 'chroma_db')
+
+    vector_store_from_client = Chroma(
+        client=persistent_client,
+        collection_name="pdf_store",
+        embedding_function=embeddings,
+    )
+    return vector_store_from_client
 
 
 def create_llm(model_path = config['tinyllama_model']['model_path'], model_type = config['tinyllama_model']['model_type'], model_config = config['tinyllama_model']['model_config'], gpu_layers= config['tinyllama_model']['model_config']['gpu_layers']):
@@ -28,11 +43,6 @@ def create_llm(model_path = config['tinyllama_model']['model_path'], model_type 
         
     #llm = CTransformers(model_path='models\gpt2_pytorch_model.bin', model_type= 'gpt2', gpu_layers = 10)
     return llm
-
-def create_embeddings(embeddings_path = config['embeddings_path']):
-
-    embedding_model = HuggingFaceInstructEmbeddings(embeddings_path)
-    return embedding_model
 
 def create_chat_memory(chat_history):
     return ConversationBufferWindowMemory(memory_key= "history", chat_memory=chat_history, k = 3)
@@ -45,6 +55,8 @@ def create_llm_chain(llm, chat_prompt, memory):
 
 def load_normal_chain(chat_history):
     return chatChain(chat_history)
+
+
 
 class chatChain:
     def __init__(self, chat_history):
