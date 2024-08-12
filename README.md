@@ -86,7 +86,7 @@ python clear_chat_history.py
 ```
 ## **Project Structure**
 
-*   `app.py`: The main entry point for the Streamlit application.
+*   `runner.py`: The main entry point for the Streamlit application.
 *   `config.yaml`: Configuration file containing paths and settings for the application.
 *   `llmchains.py`: Contains functions and classes for creating language model chains and managing chat interactions.
 *   `pdf_handler.py`: Handles PDF extraction, text chunking, and vector database integration.
