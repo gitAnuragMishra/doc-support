@@ -1,5 +1,5 @@
 import streamlit as st
-from llmchains import load_normal_chain 
+from llmchains import load_normal_chain, load_vectordb_chain
 from utility import save_chat_history_json, load_chat_history_json, get_timestamp
 from langchain.memory import StreamlitChatMessageHistory
 import torch
@@ -8,14 +8,17 @@ import os
 from pdf_handler import add_pdf_to_db
 # import atexit
 # import shutil
-# import time
+import time
 
 with open('config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 
 def load_chain(chat_history):
-    return load_normal_chain(chat_history)
+    if st.session_state.pdf_chat:
+        return load_vectordb_chain(chat_history)
+    else: 
+        return load_normal_chain(chat_history)
 
 def set_send_input():
     st.session_state.send_input = True
@@ -33,7 +36,8 @@ def save_chat_history():
         else:
             save_chat_history_json(st.session_state.history, config['chat_history_path'] + st.session_state.session_key)
 
-
+def toggle_pdf_chat():
+    st.session_state.pdf_chat = True
     
 
 
@@ -41,6 +45,7 @@ def save_chat_history():
 def main():
     st.set_page_config(page_title="Doc Support", page_icon=':books:')
     st.header("Doc Support :books:", divider=True)
+    st.text('Powered by LangChain, Streamlit and opensource huggingface models')
 
     
 
@@ -67,8 +72,9 @@ def main():
     
     if st.session_state.session_key != 'new_session':
         st.session_state.history = load_chat_history_json(config['chat_history_path'] + st.session_state.session_key)
-    
-    uploaded_pdf = st.sidebar.file_uploader("Upload PDF", type="pdf", accept_multiple_files=True, key=st.session_state.pdf_uploader_key)
+
+    st.sidebar.toggle('Chat with uploaded PDFs', key='pdf_chat', value=False)
+    uploaded_pdf = st.sidebar.file_uploader("Upload PDF", type="pdf", accept_multiple_files=True, key=st.session_state.pdf_uploader_key, on_change=toggle_pdf_chat)
 
     if uploaded_pdf:
         with st.sidebar:
@@ -93,19 +99,27 @@ def main():
 
     if send_button or st.session_state.send_input:
         if st.session_state.user_question != ' ':
-            with st.spinner('Generating response...'):
-                llm_response = llm_chain.run(user_input=st.session_state.user_question)
-                with chat_container:
-                    # with st.chat_message('user', avatar='human'):
-                    #     st.write(st.session_state.user_question)  # One way of writing user question.
+            stopwatch_placeholder = st.empty()  # Create a placeholder for the stopwatch display
+            start_time = time.time()
 
-                    # st.chat_message('llm', avatar='ai').write(llm_response)  # Another way to write LLM response.
-                    pass  # This is where you handle user questions.
+            with st.spinner('Generating response...'):
+                # Generate the response and measure the time taken
+                llm_response = llm_chain.run(user_input=st.session_state.user_question)
+            
+            # Calculate the elapsed time
+            elapsed_time = time.time() - start_time
+            stopwatch_placeholder.write(f"Time taken: {elapsed_time:.2f} seconds")
+                # with chat_container:
+                #     # with st.chat_message('user', avatar='human'):
+                #     #     st.write(st.session_state.user_question)  # One way of writing user question.
+
+                #     # st.chat_message('llm', avatar='ai').write(llm_response)  # Another way to write LLM response.
+                #     pass  # This is where you handle user questions.
 
 
     if chat_history.messages != []:
         with chat_container:
-            st.write("Chat History: ")
+            st.write("Chatting with "+ config['tinyllama_model']['model_name'])
             for message in chat_history.messages:
                 with st.spinner('Generating response...'):
                     st.chat_message(message.type).write(message.content)

@@ -1,5 +1,7 @@
-from langchain.chains import StuffDocumentsChain, LLMChain, ConversationalRetrievalChain
-from langchain_community.embeddings import HuggingFaceInstructEmbeddings, HuggingFaceBgeEmbeddings
+from langchain.chains import LLMChain
+# from langchain.chains import StuffDocumentsChain, ConversationalRetrievalChain
+from langchain.chains import RetrievalQA
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain_community.llms.ctransformers import CTransformers
@@ -56,6 +58,11 @@ def create_llm_chain(llm, chat_prompt, memory):
 def load_normal_chain(chat_history):
     return chatChain(chat_history)
 
+def load_vectordb_chain(chat_history):
+    return pdfChatChain(chat_history)
+
+def load_retrieval_chain(llm, memory, vectordb):
+    return RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever(), memory=memory)
 
 
 class chatChain:
@@ -75,6 +82,18 @@ class chatChain:
 
     def run(self, user_input):
         #return self.llm_chain.invoke(user_input, stop = ['Human:'])
+        print('Normal chat running')
         return self.llm_chain.run(human_input = user_input, history = self.memory.chat_memory.messages, stop = ['Human:'])
 
 
+class pdfChatChain:
+    def __init__(self, chat_history):
+        self.memory = create_chat_memory(chat_history)
+        self.vectordb = load_vectordb(create_embeddings())
+        llm = create_llm()
+        #chat_prompt = create_prompt_from_template(memory_prompt_template)
+        self.llm_chain= load_retrieval_chain(llm, self.memory, self.vectordb)
+
+    def run(self, user_input):
+        print('Pdf chat running')
+        return self.llm_chain.run(query = user_input, history = self.memory.chat_memory.messages, stop = ['Human:'])
