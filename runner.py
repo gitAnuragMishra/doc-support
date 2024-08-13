@@ -146,8 +146,16 @@ def main():
     
     
     # atexit.register(cleanup_vector_db_folder)
-
-
+    st.sidebar.subheader("Instructions")
+    st.sidebar.markdown("""
+    **Upload PDFs:** Use the sidebar to upload one or more PDF files. The uploaded PDFs will be processed and added to the vector database.
+    
+    **Toggle Between PDF Chat and Normal Chat:** Use the toggle in the sidebar to switch between PDF-based chat and normal chat. This will call the appropriate chat chain (pdfChatChain for PDF interactions and chatChain for normal interactions).
+    
+    **Chat Interface:** Enter your questions or prompts in the main chat area. The application will generate responses based on the content of the uploaded PDFs or general language model capabilities.
+    
+    **Save/Load Sessions:** Select existing sessions from the dropdown in the sidebar to load previous chats, or start a new session. The chat history is saved automatically after each interaction.
+    """)
 
     
 
