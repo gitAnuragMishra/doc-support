@@ -59,7 +59,7 @@ Before running the application, ensure that you have configured the necessary pa
 To start the Streamlit application, run the following command:
 
 ```bash
-streamlit run app.py
+streamlit run runner.py
 ```
 This will launch the Doc Support application in your web browser.
 
