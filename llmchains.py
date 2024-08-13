@@ -15,8 +15,8 @@ from sentence_transformers import SentenceTransformer #type: ignore
 #from transformers import AutoModelForCausalLM
 #from llama_cpp import Llama
 import os
-os.environ['HF_HOME'] = r'E:\doc-support\models'
-os.environ['HF_HUB_CACHE'] = r'E:\doc-support\models'
+os.environ['HF_HOME'] = r'D:\models'
+os.environ['HF_HUB_CACHE'] = r'D:\models'
 with open('config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
@@ -24,8 +24,8 @@ with open('config.yaml', 'r') as f:
 
 
 def create_embeddings(embeddings_path = config['embeddings_path']):
-    embedding_model = HuggingFaceBgeEmbeddings(model_name = embeddings_path, cache_folder=r'E:\doc-support\models')
-    #embedding_model = SentenceTransformer(model_name_or_path='E:\doc-support\models\models--sentence-transformers--all-MiniLM-L6-v2', cache_folder=r'E:\doc-support\models')
+    embedding_model = HuggingFaceBgeEmbeddings(model_name = embeddings_path, cache_folder=r'D:\models')
+    #embedding_model = SentenceTransformer(model_name_or_path='D:\models\models--sentence-transformers--all-MiniLM-L6-v2', cache_folder=r'D:\models')
     return embedding_model
 def load_vectordb(embeddings):
     persistent_client = chromadb.PersistentClient(path = 'chroma_db')
